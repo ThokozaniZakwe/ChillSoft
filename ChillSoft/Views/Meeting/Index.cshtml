@@ -1,0 +1,31 @@
+﻿@model List<Meeting>
+
+<h1 class="bg-primary text-white text-center p-3">Meetings</h1>
+
+<div class="row">
+    <table id="meetingsTable">
+        <thead>
+            <tr>
+                <td>Meeting Number</td><td>Meeting Type</td>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach(var meeting in Model)
+            {
+                <tr>
+                    <td>@meeting.MeetingNumber</td>
+                    <td>@meeting.MeetingTypeId</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+<div class="row">
+    <a class="btn btn-primary ms-auto w-25 me-2" asp-action="Add">New meeting</a>
+</div>
+
+<script>
+    $(document).ready(function(){
+        $('#meetingsTable').DataTable();
+    });
+</script>
