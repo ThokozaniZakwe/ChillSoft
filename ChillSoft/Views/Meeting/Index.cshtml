@@ -3,10 +3,10 @@
 <h1 class="bg-primary text-white text-center p-3">Meetings</h1>
 
 <div class="row">
-    <table id="meetingsTable">
+    <table id="meetingsTable" class="table table-striped" style="width: 100%;">
         <thead>
             <tr>
-                <td>Meeting Number</td><td>Meeting Type</td>
+                <th>Meeting Number</th><th>Date Created</th><th>Meeting Type</th><th></th>
             </tr>
         </thead>
         <tbody>
@@ -14,7 +14,9 @@
             {
                 <tr>
                     <td>@meeting.MeetingNumber</td>
+                    <td>@meeting.MeetinngDate</td>
                     <td>@meeting.MeetingTypeId</td>
+                    <td><a class="btn btn-sm btn-outline-info" asp-action="Edit" asp-route-id="@meeting.Id">Details</a></td>
                 </tr>
             }
         </tbody>

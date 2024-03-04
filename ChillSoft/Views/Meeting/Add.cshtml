@@ -3,9 +3,10 @@
 <h1 class="bg-primary text-center text-white p-3">Add Meeting <i class="fa-regular fa-handshake"></i></h1>
 
 <form asp-action="Add">
+    <div class="text-danger" asp-validation-summary="All"></div>
     <div class="mb-3">
-        <label asp-for="MeetingNumber">Meeting Number</label>
-        <input class="form-control" asp-for="MeetingNumber" />
+        <label asp-for="MeetinngDate">Date Created</label>
+        <input class="form-control" asp-for="MeetinngDate" />
     </div>
     <div class="mb-3">
         <label>Meeting Type</label>

@@ -23,44 +23,82 @@ namespace ChillSoft.Controllers
         [HttpGet]
         public async Task<IActionResult> Add()
         {
-            List<MeetingType> meetingTypes = _context.MeetingTypes.Where(m => !m.IsDeleted).ToList();
-            ViewBag.MT = new SelectList(meetingTypes, "MeetingTypeId", "Description");
+            List<MeetingType> meetingTypes = await _context.MeetingTypes.Where(m => !m.IsDeleted).ToListAsync();
+            var lastMeeting = await _context.Meetings.Where(x => !x.IsDeleted).OrderBy(x => x.Id).LastOrDefaultAsync();
+            ViewBag.MT = new SelectList(meetingTypes, "Id", "Description");
             return View();
         }
 
         [HttpPost]
         public async Task<IActionResult> Add(Meeting newMeeting)
         {
-            if(newMeeting == null)
+            List<MeetingType> meetingTypes = await _context.MeetingTypes.Where(m => !m.IsDeleted).ToListAsync();
+            ViewBag.MT = new SelectList(meetingTypes, "Id", "Description");
+
+            if (newMeeting == null)
             {
                 return View();
             }
 
-            if(ModelState.IsValid)
+            //if(ModelState.IsValid)
+            //{
+            if (newMeeting.MeetingTypeId == 0)
             {
-                var existingMeeting = await _context.Meetings.FirstOrDefaultAsync(m => m.Id == newMeeting.Id);
-                if(existingMeeting != null)
-                {
-                    ModelState.AddModelError("Meeting", "The Meeting already exists!");
-                    return View();
-                }
-
-                var lastMeeting = await _context.Meetings.Where(x => !x.IsDeleted).OrderBy(x => x.Id).LastOrDefaultAsync();
-                var meetingType = _context.MeetingTypes.Where(x => !x.IsDeleted && x.Id == newMeeting.MeetingTypeId).FirstOrDefault();
-                if (lastMeeting != null && meetingType != null)
-                {
-                    newMeeting.MeetingNumber = meetingType.Description.Substring(0, 1) + lastMeeting.Id.ToString();
-                }
-                else
-                {
-                    newMeeting.MeetingNumber = meetingType.Description.Substring(0, 1) + "0";
-                }
-
-                await _context.Meetings.AddAsync(newMeeting);
-
-                return RedirectToAction(nameof(Index));
+                ModelState.Clear();
+                ModelState.AddModelError("Meeting", "Please select Meeting Type");
+                return View();
             }
+            if (newMeeting.MeetinngDate == null)
+            {
+                ModelState.Clear();
+                ModelState.AddModelError("Meeting", "Please select Meeting Date");
+                return View();
+            }
+            var existingMeeting = await _context.Meetings.FirstOrDefaultAsync(m => m.Id == newMeeting.Id);
+            if (existingMeeting != null)
+            {
+                ModelState.AddModelError("Meeting", "The Meeting already exists!");
+                return View();
+            }
+
+            var lastMeeting = await _context.Meetings.Where(x => !x.IsDeleted).OrderBy(x => x.Id).LastOrDefaultAsync();
+            var meetingType = _context.MeetingTypes.Where(x => !x.IsDeleted && x.Id == newMeeting.MeetingTypeId).FirstOrDefault();
+            if (lastMeeting != null && meetingType != null)
+            {
+                newMeeting.MeetingNumber = meetingType.Description.Substring(0, 1) + lastMeeting.Id.ToString();
+            }
+            else
+            {
+                newMeeting.MeetingNumber = meetingType.Description.Substring(0, 1) + "0";
+            }
+
+            var addedMeeting = await _context.Meetings.AddAsync(newMeeting);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Edit), new { Id = addedMeeting.Entity.Id });
+            //}
             return View();
+        }
+
+        public async Task<IActionResult> Edit(int Id)
+        {
+            var currentMeeting = await _context.Meetings.Where(x => !x.IsDeleted).FirstOrDefaultAsync(x => x.Id == Id);
+            ViewBag.MeetingItems = await _context.MeetingItems.Where(item => !item.IsDeleted && item.MeetingId == Id).ToListAsync();
+            return View(currentMeeting);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> AddMeetingItem(MeetingItem item)
+        {
+            if(item == null)
+            {
+                return RedirectToAction(nameof(Edit), item.Id);
+            }
+
+            await _context.MeetingItems.AddAsync(item);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Edit), item.MeetingId);
         }
     }
 }

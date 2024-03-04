@@ -17,6 +17,10 @@
     {
       "library": "jquery@3.7.1",
       "destination": "wwwroot/lib/jquery/"
+    },
+    {
+      "library": "print-js@1.6.0",
+      "destination": "wwwroot/lib/print-js/"
     }
   ]
 }

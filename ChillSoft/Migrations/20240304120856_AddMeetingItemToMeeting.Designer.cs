@@ -4,6 +4,7 @@ using ChillSoft.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ChillSoft.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240304120856_AddMeetingItemToMeeting")]
+    partial class AddMeetingItemToMeeting
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -32,6 +35,9 @@ namespace ChillSoft.Migrations
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
+
+                    b.Property<int>("MeetingItemId")
+                        .HasColumnType("int");
 
                     b.Property<string>("MeetingNumber")
                         .IsRequired()
@@ -58,10 +64,6 @@ namespace ChillSoft.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Comments")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -72,7 +74,7 @@ namespace ChillSoft.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<int>("MeetingId")
+                    b.Property<int?>("MeetingId")
                         .HasColumnType("int");
 
                     b.Property<string>("PersonResponsible")
@@ -80,6 +82,8 @@ namespace ChillSoft.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("MeetingId");
 
                     b.ToTable("MeetingItems");
                 });
@@ -153,6 +157,13 @@ namespace ChillSoft.Migrations
                     b.Navigation("MeetingType");
                 });
 
+            modelBuilder.Entity("ChillSoft.Models.MeetingItem", b =>
+                {
+                    b.HasOne("ChillSoft.Models.Meeting", null)
+                        .WithMany("MeetingItems")
+                        .HasForeignKey("MeetingId");
+                });
+
             modelBuilder.Entity("ChillSoft.Models.MeetingItemStatus", b =>
                 {
                     b.HasOne("ChillSoft.Models.Meeting", "Meeting")
@@ -175,6 +186,8 @@ namespace ChillSoft.Migrations
             modelBuilder.Entity("ChillSoft.Models.Meeting", b =>
                 {
                     b.Navigation("MeetingItemStatuses");
+
+                    b.Navigation("MeetingItems");
                 });
 
             modelBuilder.Entity("ChillSoft.Models.MeetingItem", b =>
