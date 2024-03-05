@@ -16,7 +16,6 @@ namespace ChillSoft.Controllers
         }
         public async Task<IActionResult> Index()
         {
-            ViewData["MeetingTypes"] = new SelectList(await _context.MeetingTypes.Where(m => !m.IsDeleted).ToListAsync());
             return View(_context.Meetings.Where(x => !x.IsDeleted).Include(x => x.MeetingType).ToList());
         }
 
@@ -82,8 +81,9 @@ namespace ChillSoft.Controllers
 
         public async Task<IActionResult> Edit(int Id)
         {
-            var currentMeeting = await _context.Meetings.Where(x => !x.IsDeleted).FirstOrDefaultAsync(x => x.Id == Id);
-            ViewBag.MeetingItems = await _context.MeetingItems.Where(item => !item.IsDeleted && item.MeetingId == Id).ToListAsync();
+            var currentMeeting = await _context.Meetings.Where(x => !x.IsDeleted).Include(x => x.MeetingType).Include(x => x.MeetingItemStatuses).FirstOrDefaultAsync(x => x.Id == Id);
+            ViewBag.MeetingItems = await _context.MeetingItems.Where(item => !item.IsDeleted && item.MeetingId == Id).Include(x => x.MeetingItemStatuses).ToListAsync();
+            ViewData["MeetingType"] = await _context.MeetingTypes.Where(x => !x.IsDeleted && x.Id == currentMeeting.MeetingTypeId).FirstOrDefaultAsync();
             return View(currentMeeting);
         }
 

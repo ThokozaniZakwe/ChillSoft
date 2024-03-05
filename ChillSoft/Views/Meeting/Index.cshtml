@@ -10,19 +10,19 @@
             </tr>
         </thead>
         <tbody>
-            @foreach(var meeting in Model)
+            @foreach (var meeting in Model)
             {
                 <tr>
                     <td>@meeting.MeetingNumber</td>
                     <td>@meeting.MeetinngDate</td>
-                    <td>@meeting.MeetingTypeId</td>
+                    <td>@meeting.MeetingType.Description</td>
                     <td><a class="btn btn-sm btn-outline-info" asp-action="Edit" asp-route-id="@meeting.Id">Details</a></td>
                 </tr>
             }
         </tbody>
     </table>
 </div>
-<div class="row">
+<div class="row mt-3">
     <a class="btn btn-primary ms-auto w-25 me-2" asp-action="Add">New meeting</a>
 </div>
 
