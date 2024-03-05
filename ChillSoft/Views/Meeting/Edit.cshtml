@@ -27,7 +27,8 @@
             <tbody>
                 @foreach (MeetingItem item in ViewBag.MeetingItems)
                 {
-                    <tr class="text-center">
+                    <tr class="text-center meetingItem" style="cursor: pointer;">
+                        <input type="hidden" value="@item.Id">
                         <td>@item.Description</td>
                         <td>@item.Comments</td>
                         <td>@(item.MeetingItemStatuses?.Where(s => s.MeetingItemId == item.Id)?.FirstOrDefault()?.Status ?? "")</td>
@@ -76,40 +77,41 @@
 </div>
 
 
-div class="modal" id="editItemModal" tabindex="-1">
-<div class="modal-dialog">
-    <form asp-action="AddMeetingItem">
-        <input type="hidden" name="meetingId" value="@Model.Id" />
-        <div class="modal-content">
-            <div class="modal-header">
-                <h1 class="modal-title fs-5" id="exampleModalLabel">Add Meeting Item</h1>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+<div class="modal" id="updateItemModal" tabindex="-1">
+    <div class="modal-dialog">
+        <form asp-action="EditMeetingItem">
+            <input type="hidden" name="meetingId" value="@Model.Id" />
+            <input type="hidden" name="Id" value="">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="exampleModalLabel">Update Meeting Item</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-2">
+                        <label>Item Description</label>
+                        <input class="form-control" name="description" />
+                    </div>
+                    <div class="mb-2">
+                        <label>Item Due Date</label>
+                        <input class="form-control" type="datetime-local" name="dueDate" />
+                    </div>
+                    <div class="mb-2">
+                        <label>Peson Responsible</label>
+                        <input class="form-control" name="personResponsible" />
+                    </div>
+                    <div class="mb-2">
+                        <label>Comments</label>
+                        <textarea class="form-control" name="comments"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Save changes</button>
+                </div>
             </div>
-            <div class="modal-body">
-                <div class="mb-2">
-                    <label>Item Description</label>
-                    <input class="form-control" name="description" />
-                </div>
-                <div class="mb-2">
-                    <label>Item Due Date</label>
-                    <input class="form-control" type="datetime-local" name="dueDate" />
-                </div>
-                <div class="mb-2">
-                    <label>Peson Responsible</label>
-                    <input class="form-control" name="personResponsible" />
-                </div>
-                <div class="mb-2">
-                    <label>Comments</label>
-                    <textarea class="form-control" name="comments"></textarea>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="submit" class="btn btn-primary">Save changes</button>
-            </div>
-        </div>
-    </form>
-</div>
+        </form>
+    </div>
 </div>
 <script>
     document.addEventListener('DOMContentLoaded', () => {
@@ -119,5 +121,26 @@ div class="modal" id="editItemModal" tabindex="-1">
         });
 
         const addItemModal = new bootstrap.Modal('#addItemModal');
+        const updateItemModal = new bootstrap.Modal('#updateItemModal');
+
+        //document.querySelector('#meetingItem').addEventListener('click', ()=>{
+        //    updateItemModal.show();
+        //});
+
+        const items = document.querySelectorAll('.meetingItem');
+        items.forEach((item) => {
+            item.addEventListener('click', () => {
+                updateItemModal.show();
+                const updateModal = document.querySelector('#updateItemModal');
+                //console.log(updateModal.firstElementChild.firstElementChild.firstElementChild.nextElementSibling.firstElementChild.nextElementSibling.firstElementChild.nextElementSibling.nextElementSibling.nextElementSibling);
+                updateModal.firstElementChild.firstElementChild.firstElementChild.nextElementSibling.nextElementSibling.firstElementChild.nextElementSibling.firstElementChild.firstElementChild.nextElementSibling.value = item.firstElementChild.nextElementSibling.textContent;
+                updateModal.firstElementChild.firstElementChild.firstElementChild.nextElementSibling.nextElementSibling.firstElementChild.nextElementSibling.firstElementChild.nextElementSibling.lastElementChild.innerHTML = new Date().toDateString();
+                updateModal.firstElementChild.firstElementChild.firstElementChild.nextElementSibling.nextElementSibling.firstElementChild.nextElementSibling.firstElementChild.nextElementSibling.nextElementSibling.lastElementChild.value = item.lastElementChild.textContent;
+                updateModal.firstElementChild.firstElementChild.firstElementChild.nextElementSibling.nextElementSibling.firstElementChild.nextElementSibling.firstElementChild.nextElementSibling.nextElementSibling.nextElementSibling.lastElementChild.value = item.firstElementChild.nextElementSibling.nextElementSibling.textContent;
+                updateModal.firstElementChild.firstElementChild.firstElementChild.nextElementSibling.value = item.firstElementChild.value;
+
+                console.log(item.firstElementChild.value);
+            });
+        });
     });
 </script>

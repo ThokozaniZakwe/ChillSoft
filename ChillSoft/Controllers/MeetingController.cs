@@ -98,7 +98,27 @@ namespace ChillSoft.Controllers
             await _context.MeetingItems.AddAsync(item);
             await _context.SaveChangesAsync();
 
-            return RedirectToAction(nameof(Edit), item.MeetingId);
+            //int Id = item.MeetingId;
+
+            return RedirectToAction(nameof(Edit), new { Id = item.Id });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> EditMeetingItem(MeetingItem item)
+        {
+            var dbItem = await _context.MeetingItems.Where(i => !i.IsDeleted && i.Id == item.Id).FirstOrDefaultAsync();
+            if(dbItem == null)
+            {
+                return RedirectToAction(nameof(Edit), item.MeetingId);
+            }
+
+            dbItem.Description = item.Description;
+            dbItem.Comments = item.Comments;
+            dbItem.PersonResponsible = item.PersonResponsible;
+            dbItem.DueDate = item.DueDate;
+
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Edit), new { Id = dbItem.MeetingId });
         }
     }
 }
