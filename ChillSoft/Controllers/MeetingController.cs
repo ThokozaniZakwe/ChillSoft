@@ -1,10 +1,11 @@
-﻿using ChillSoft.Data;
-using ChillSoft.Models;
+﻿using Chillisoft.Data;
+using Chillisoft.Models;
+using ChilliSoft.Models.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 
-namespace ChillSoft.Controllers
+namespace Chillisoft.Controllers
 {
     public class MeetingController : Controller
     {
@@ -81,31 +82,64 @@ namespace ChillSoft.Controllers
 
         public async Task<IActionResult> Edit(int Id)
         {
-            var currentMeeting = await _context.Meetings.Where(x => !x.IsDeleted).Include(x => x.MeetingType).Include(x => x.MeetingItemStatuses).FirstOrDefaultAsync(x => x.Id == Id);
+            var currentMeeting = await _context.Meetings.Where(x => !x.IsDeleted).Include(x => x.MeetingType).FirstOrDefaultAsync(x => x.Id == Id);
             ViewBag.MeetingItems = await _context.MeetingItems.Where(item => !item.IsDeleted && item.MeetingId == Id).Include(x => x.MeetingItemStatuses).ToListAsync();
+            var previousMeetingItems = await _context.MeetingItems.Where(item => !item.IsDeleted && item.MeetingId != Id).ToListAsync();
+            ViewBag.PreviousItems = new SelectList(previousMeetingItems, "Id", "Description");
             ViewData["MeetingType"] = await _context.MeetingTypes.Where(x => !x.IsDeleted && x.Id == currentMeeting.MeetingTypeId).FirstOrDefaultAsync();
-            return View(currentMeeting);
+            ViewData["meetingStatuses"] = await _context.MeetingItemStatuses.Where(x => !x.IsDeleted).ToListAsync();
+            ItemAndStatusesViewModel meetingVM = new ItemAndStatusesViewModel
+            {
+                Meeting = currentMeeting,
+                MeetingItem = new MeetingItem(),
+                MeetingItemStatus = new MeetingItemStatus()
+            };
+            return View(meetingVM);
         }
 
         [HttpPost]
-        public async Task<IActionResult> AddMeetingItem(MeetingItem item)
+        public async Task<IActionResult> AddMeetingItem(ItemAndStatusesViewModel vm)
         {
+            MeetingItem item = vm.MeetingItem;
+            item.MeetingId = vm.Meeting.Id;
+            MeetingItemStatus meetingItemStatus = vm.MeetingItemStatus;
             if(item == null)
             {
                 return RedirectToAction(nameof(Edit), item.Id);
             }
 
-            await _context.MeetingItems.AddAsync(item);
+            //var meetingItemStatus = new MeetingItemStatus
+            //{
+            //    MeetingId = item.MeetingId,
+            //    Status = "new",
+            //    Action = "New Action",
+            //    //MeetingItemId = item.Id,
+            //    ResponsiblePerson = item.PersonResponsible
+            //};
+            
+
+            var newMeetingItem = await _context.MeetingItems.AddAsync(item);
+
+
+            await _context.SaveChangesAsync();
+
+            //meetingItemStatus.MeetingItemId = newMeetingItem.Entity.Id;
+            meetingItemStatus.MeetingItemId = newMeetingItem.Entity.Id;
+            meetingItemStatus.MeetingId = vm.Meeting.Id;
+            meetingItemStatus.ResponsiblePerson = newMeetingItem.Entity.PersonResponsible;
+            await _context.MeetingItemStatuses.AddAsync(meetingItemStatus);
+
             await _context.SaveChangesAsync();
 
             //int Id = item.MeetingId;
 
-            return RedirectToAction(nameof(Edit), new { Id = item.Id });
+            return RedirectToAction(nameof(Edit), new { Id = item.MeetingId });
         }
 
         [HttpPost]
-        public async Task<IActionResult> EditMeetingItem(MeetingItem item)
+        public async Task<IActionResult> EditMeetingItem(ItemAndStatusesViewModel vm)//(MeetingItem item)
         {
+            MeetingItem item = vm.MeetingItem;
             var dbItem = await _context.MeetingItems.Where(i => !i.IsDeleted && i.Id == item.Id).FirstOrDefaultAsync();
             if(dbItem == null)
             {
@@ -117,8 +151,41 @@ namespace ChillSoft.Controllers
             dbItem.PersonResponsible = item.PersonResponsible;
             dbItem.DueDate = item.DueDate;
 
+            
+
             await _context.SaveChangesAsync();
+
+            MeetingItemStatus status = vm.MeetingItemStatus;
+            var dbMeetingStatus = await _context.MeetingItemStatuses.Where(x => !x.IsDeleted && x.Id == status.Id).FirstOrDefaultAsync();
+            if (dbMeetingStatus == null)
+            {
+                status.MeetingItemId = dbItem.Id;
+                status.MeetingId = dbItem.MeetingId;
+                status.ResponsiblePerson = dbItem.PersonResponsible;
+                await _context.MeetingItemStatuses.AddAsync(status);
+            }
+            else
+            {
+                dbMeetingStatus.Action = status.Action;
+                dbMeetingStatus.Status = status.Status;
+                dbMeetingStatus.ResponsiblePerson = dbItem.PersonResponsible;
+            }
+            await _context.SaveChangesAsync();
+
             return RedirectToAction(nameof(Edit), new { Id = dbItem.MeetingId });
+        }
+
+        public async Task<IActionResult> AddPreviousMeetingItem(ItemAndStatusesViewModel vm)
+        {
+            var previousItem = vm.MeetingItem;
+            var currentMeeting = vm.Meeting;
+
+            var prevDbItem = await _context.MeetingItems.Where(x => !x.IsDeleted && x.Id == previousItem.Id).FirstOrDefaultAsync();
+            prevDbItem.MeetingId = currentMeeting.Id;
+            await _context.SaveChangesAsync();
+
+
+            return RedirectToAction(nameof(Edit), new { Id = currentMeeting.Id });
         }
     }
 }

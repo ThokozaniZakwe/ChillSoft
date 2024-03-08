@@ -1,4 +1,4 @@
-using ChillSoft.Data;
+using Chillisoft.Data;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);

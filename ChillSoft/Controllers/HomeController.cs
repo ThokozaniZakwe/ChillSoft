@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
-namespace ChillSoft.Controllers
+namespace Chillisoft.Controllers
 {
     public class HomeController : Controller
     {

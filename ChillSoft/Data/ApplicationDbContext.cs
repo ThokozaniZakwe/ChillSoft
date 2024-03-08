@@ -1,7 +1,7 @@
-﻿using ChillSoft.Models;
+﻿using Chillisoft.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace ChillSoft.Data
+namespace Chillisoft.Data
 {
     public class ApplicationDbContext: DbContext
     {

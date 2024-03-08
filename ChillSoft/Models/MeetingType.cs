@@ -1,4 +1,4 @@
-﻿namespace ChillSoft.Models
+﻿namespace Chillisoft.Models
 {
     public class MeetingType
     {

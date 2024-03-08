@@ -2,7 +2,7 @@
 
 #nullable disable
 
-namespace ChillSoft.Migrations
+namespace Chillisoft.Migrations
 {
     /// <inheritdoc />
     public partial class AddPersonResponsibleOnMeetingItem : Migration
